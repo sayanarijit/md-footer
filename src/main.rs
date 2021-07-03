@@ -3,17 +3,11 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 
-#[derive(Default)]
-struct Link {
-    text: String,
-    href: String,
-}
-
 fn convert(mut reader: File) -> String {
     let mut is_codeblock = false;
     let mut is_hiperlink = false;
-    let mut collected_links = vec![];
-    let mut links_stack = vec![];
+    let mut collected_links: Vec<String> = vec![];
+    let mut links_stack: Vec<String> = vec![];
     let mut last_byte = b'\0';
     let mut bytes = vec![];
     let mut byte = [0u8];
@@ -27,7 +21,7 @@ fn convert(mut reader: File) -> String {
             is_codeblock = true;
             bytes.push(c);
         } else if c == b'[' && !is_codeblock {
-            links_stack.push(Link::default());
+            links_stack.push("".into());
             bytes.push(c);
         } else if c == b'(' && last_byte == b']' && !is_codeblock {
             is_hiperlink = true;
@@ -35,10 +29,10 @@ fn convert(mut reader: File) -> String {
             is_hiperlink = false;
             if let Some(link) = links_stack.pop() {
                 let pointer =
-                    if let Some(position) = collected_links.iter().position(|l| l == &link.href) {
+                    if let Some(position) = collected_links.iter().position(|l| l == &link) {
                         position + 1
                     } else {
-                        collected_links.push(link.href.clone());
+                        collected_links.push(link);
                         collected_links.len()
                     };
 
@@ -50,12 +44,11 @@ fn convert(mut reader: File) -> String {
             } else {
                 bytes.push(c);
             }
-        } else if !is_codeblock {
+        } else if !is_codeblock && is_hiperlink {
             if let Some(link) = links_stack.last_mut() {
                 if is_hiperlink {
-                    link.href.push(c as char);
+                    link.push(c as char);
                 } else {
-                    link.text.push(c as char);
                     bytes.push(c);
                 };
             } else {
