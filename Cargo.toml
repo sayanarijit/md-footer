@@ -1,0 +1,16 @@
+[package]
+name = "md-footer"
+version = "0.1.0"
+authors = ["Arijit Basu <sayanarijit@gmail.com>"]
+edition = "2018"
+description = "Generate markdown footer links"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/sayanarijit/md-footer"
+homepage = "https://github.com/sayanarijit/md-footer"
+keywords = ["markdown"]
+categories = ["command-line-utilities"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
