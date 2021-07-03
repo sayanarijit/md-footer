@@ -34,24 +34,37 @@ fn convert(reader: BufReader<File>) -> String {
                         chars.push(c);
                     } else if c == '(' && last_char == ']' && !is_codeblock {
                         is_hiperlink = true;
-
-                        chars.push('[');
-                        for c in (collected_links.len() + 1).to_string().chars() {
-                            chars.push(c);
-                        }
-                        chars.push(']');
                     } else if c == ')' && !is_codeblock && is_hiperlink {
                         is_hiperlink = false;
                         if let Some(link) = links_stack.pop() {
-                            collected_links.push(link);
-                        }
-                    } else if let Some(link) = links_stack.last_mut() {
-                        if is_hiperlink {
-                            link.href.push(c);
+                            let pointer = if let Some(position) =
+                                collected_links.iter().position(|l| l == &link.href)
+                            {
+                                position + 1
+                            } else {
+                                collected_links.push(link.href.clone());
+                                collected_links.len()
+                            };
+
+                            chars.push('[');
+                            for c in pointer.to_string().chars() {
+                                chars.push(c);
+                            }
+                            chars.push(']');
                         } else {
-                            link.text.push(c);
                             chars.push(c);
-                        };
+                        }
+                    } else if !is_codeblock {
+                        if let Some(link) = links_stack.last_mut() {
+                            if is_hiperlink {
+                                link.href.push(c);
+                            } else {
+                                link.text.push(c);
+                                chars.push(c);
+                            };
+                        } else {
+                            chars.push(c);
+                        }
                     } else {
                         chars.push(c);
                     };
@@ -69,7 +82,7 @@ fn convert(reader: BufReader<File>) -> String {
     lines.push("".into());
     lines.push("".into());
     for (i, link) in collected_links.iter().enumerate() {
-        lines.push(format!("[{}]:{}", i + 1, link.href));
+        lines.push(format!("[{}]:{}", i + 1, link));
     }
     lines.join("\n")
 }
