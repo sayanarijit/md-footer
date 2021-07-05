@@ -34,3 +34,5 @@ cat /path/fo/file.md | md-footer
 
 md-footer /path/to/footer.md
 ```
+
+It was used to [generate footer links for the xplr book](https://github.com/sayanarijit/xplr/pull/294/files).
