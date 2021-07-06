@@ -46,11 +46,7 @@ fn convert(mut reader: File) -> String {
             }
         } else if !is_codeblock && is_hiperlink {
             if let Some(link) = links_stack.last_mut() {
-                if is_hiperlink {
-                    link.push(c as char);
-                } else {
-                    bytes.push(c);
-                };
+                link.push(c as char);
             } else {
                 bytes.push(c);
             }
