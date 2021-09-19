@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use md_footer::convert;
+use md_footer::format;
 
 fn main() {
     let path = env::args()
@@ -10,7 +11,7 @@ fn main() {
 
     match fs::File::open(path) {
         Ok(file) => {
-            let result = convert(file);
+            let result = convert(file, format);
             println!("{}", result);
         }
         Err(e) => {

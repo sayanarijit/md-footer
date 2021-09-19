@@ -1,6 +1,14 @@
 use std::io::Read;
 
-pub fn convert<R: Read>(mut reader: R) -> String {
+pub fn format(index: usize, link: &str) -> String {
+    format!("[{}]:{}", index + 1, link)
+}
+
+pub fn convert<R, F>(mut reader: R, formatter: F) -> String
+where
+    R: Read,
+    F: Fn(usize, &str) -> String,
+{
     let mut is_codeblock = false;
     let mut is_hiperlink = false;
     let mut collected_links: Vec<String> = vec![];
@@ -25,13 +33,14 @@ pub fn convert<R: Read>(mut reader: R) -> String {
         } else if c == b')' && !is_codeblock && is_hiperlink {
             is_hiperlink = false;
             if let Some(link) = links_stack.pop() {
-                let pointer =
-                    if let Some(position) = collected_links.iter().position(|l| l == &link) {
-                        position + 1
-                    } else {
-                        collected_links.push(link);
-                        collected_links.len()
-                    };
+                let pointer = if let Some(position) =
+                    collected_links.iter().position(|l| l == &link)
+                {
+                    position + 1
+                } else {
+                    collected_links.push(link);
+                    collected_links.len()
+                };
 
                 bytes.push(b'[');
                 for b in pointer.to_string().bytes() {
@@ -57,9 +66,10 @@ pub fn convert<R: Read>(mut reader: R) -> String {
         bytes.push(b'\n');
         bytes.push(b'\n');
         for (i, link) in collected_links.iter().enumerate() {
-            for b in format!("[{}]:{}\n", i + 1, link).bytes() {
+            for b in formatter(i, link).bytes() {
                 bytes.push(b);
             }
+            bytes.push(b'\n');
         }
     }
 
